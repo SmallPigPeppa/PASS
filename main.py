@@ -18,7 +18,7 @@ from scipy import stats
 from PIL import Image
 
 from PASS import protoAugSSL
-from ResNet import resnet18_cbam
+from ResNet import resnet18_cbam,resnet50_cbam
 from myNetwork import network
 from iCIFAR100 import iCIFAR100
 
@@ -61,7 +61,7 @@ def main():
     device = torch.device(cuda_index if torch.cuda.is_available() else "cpu")
     task_size = int((args.total_nc - args.fg_nc) / args.task_num)  # number of classes in each incremental step
     file_name = args.data_name + '_' + str(args.fg_nc) + '_' + str(args.task_num) + '*' + str(task_size)
-    feature_extractor = resnet18_cbam()
+    feature_extractor = resnet50_cbam()
 
     model = protoAugSSL(args, file_name, feature_extractor, task_size, device)
     class_set = list(range(args.total_nc))
