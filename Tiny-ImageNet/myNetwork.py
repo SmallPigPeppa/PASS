@@ -6,7 +6,7 @@ class network(nn.Module):
     def __init__(self, numclass, feature_extractor):
         super(network, self).__init__()
         self.feature = feature_extractor
-        self.fc = nn.Linear(512, numclass, bias=True)
+        self.fc = nn.Linear(2048, numclass, bias=True)
 
     def forward(self, input):
         x = self.feature(input)
