@@ -23,7 +23,7 @@ from myNetwork import network
 from iCIFAR100 import iCIFAR100
 
 parser = argparse.ArgumentParser(description='Prototype Augmentation and Self-Supervision for Incremental Learning')
-parser.add_argument('--epochs', default=101, type=int, help='Total number of epochs to run')
+parser.add_argument('--epochs', default=160, type=int, help='Total number of epochs to run')
 parser.add_argument('--batch_size', default=64, type=int, help='Batch size for training')
 parser.add_argument('--print_freq', default=10, type=int, help='print frequency (default: 10)')
 parser.add_argument('--data_name', default='cifar100', type=str, help='Dataset name to use')
@@ -80,7 +80,7 @@ def main():
     ####### Test ######
     test_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
     print("############# Test for each Task #############")
-    test_dataset = iCIFAR100('./dataset', test_transform=test_transform, train=False, download=True)
+    test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=test_transform, train=False, download=True)
     test_dataset.targets = setup_data(test_dataset.targets, shuffle=True, seed=1993)
     acc_all = []
     for current_task in range(args.task_num+1):
@@ -116,7 +116,7 @@ def main():
     print(acc_all)
 
     print("############# Test for up2now Task #############")
-    test_dataset = iCIFAR100('./dataset', test_transform=test_transform, train=False, download=True)
+    test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=test_transform, train=False, download=True)
     test_dataset.targets = setup_data(test_dataset.targets, shuffle=True, seed=1993)
     for current_task in range(args.task_num+1):
         class_index = args.fg_nc + current_task*task_size

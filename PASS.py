@@ -34,8 +34,8 @@ class protoAugSSL:
                                                   transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
         self.test_transform = transforms.Compose([transforms.ToTensor(),
                                                  transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
-        self.train_dataset = iCIFAR100('./dataset', transform=self.train_transform, download=True)
-        self.test_dataset = iCIFAR100('./dataset', test_transform=self.test_transform, train=False, download=True)
+        self.train_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', transform=self.train_transform, download=True)
+        self.test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=self.test_transform, train=False, download=True)
         self.train_loader = None
         self.test_loader = None
     
