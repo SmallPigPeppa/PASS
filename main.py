@@ -18,10 +18,11 @@ from scipy import stats
 from PIL import Image
 
 from PASS import protoAugSSL
-from ResNet import resnet18_cbam,resnet50_cbam
+from ResNet import resnet18_cbam, resnet50_cbam
 from myNetwork import network
 from iCIFAR100 import iCIFAR100
-
+import logging
+import sys
 
 parser = argparse.ArgumentParser(description='Prototype Augmentation and Self-Supervision for Incremental Learning')
 parser.add_argument('--epochs', default=160, type=int, help='Total number of epochs to run')
@@ -41,6 +42,7 @@ parser.add_argument('--save_path', default='model_saved_check/', type=str, help=
 args = parser.parse_args()
 print(args)
 
+
 def map_new_class_index(y, order):
     return np.array(list(map(lambda x: order.index(x), y)))
 
@@ -57,7 +59,27 @@ def setup_data(test_targets, shuffle, seed):
     print(class_order)
     return map_new_class_index(test_targets, class_order)
 
+
 def main():
+    # add logging
+    logs_dir = "logs"
+
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+
+    logfilename = "logs/{}_{}".format(
+        args.data_name,
+        args.task_num
+    )
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(filename)s] => %(message)s",
+        handlers=[
+            logging.FileHandler(filename=logfilename + ".log"),
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
+
     cuda_index = 'cuda:' + args.gpu
     device = torch.device(cuda_index if torch.cuda.is_available() else "cpu")
     task_size = int((args.total_nc - args.fg_nc) / args.task_num)  # number of classes in each incremental step
@@ -68,7 +90,7 @@ def main():
     class_set = list(range(args.total_nc))
     model.setup_data(shuffle=True, seed=1993)
 
-    for i in range(args.task_num+1):
+    for i in range(args.task_num + 1):
         if i == 0:
             old_class = 0
         else:
@@ -77,20 +99,21 @@ def main():
         model.train(i, old_class=old_class)
         model.afterTrain()
 
-
     ####### Test ######
-    test_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
+    test_transform = transforms.Compose(
+        [transforms.ToTensor(), transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))])
     print("############# Test for each Task #############")
-    test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=test_transform, train=False, download=True)
+    test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=test_transform, train=False,
+                             download=True)
     test_dataset.targets = setup_data(test_dataset.targets, shuffle=True, seed=1993)
     acc_all = []
-    for current_task in range(args.task_num+1):
-        class_index = args.fg_nc + current_task*task_size
+    for current_task in range(args.task_num + 1):
+        class_index = args.fg_nc + current_task * task_size
         filename = args.save_path + file_name + '/' + '%d_model.pkl' % (class_index)
         model = torch.load(filename)
         model.eval()
         acc_up2now = []
-        for i in range(current_task+1):
+        for i in range(current_task + 1):
             if i == 0:
                 classes = [0, args.fg_nc]
             else:
@@ -111,16 +134,19 @@ def main():
             accuracy = correct.item() / total
             acc_up2now.append(accuracy)
         if current_task < args.task_num:
-            acc_up2now.extend((args.task_num-current_task)*[0])
+            acc_up2now.extend((args.task_num - current_task) * [0])
         acc_all.append(acc_up2now)
         print(acc_up2now)
+        logging.info(f"acc_up2now:{acc_up2now}")
     print(acc_all)
+    logging.info(f"acc_all:{acc_all}")
 
     print("############# Test for up2now Task #############")
-    test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=test_transform, train=False, download=True)
+    test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=test_transform, train=False,
+                             download=True)
     test_dataset.targets = setup_data(test_dataset.targets, shuffle=True, seed=1993)
-    for current_task in range(args.task_num+1):
-        class_index = args.fg_nc + current_task*task_size
+    for current_task in range(args.task_num + 1):
+        class_index = args.fg_nc + current_task * task_size
         filename = args.save_path + file_name + '/' + '%d_model.pkl' % (class_index)
         model = torch.load(filename)
         model.to(device)
