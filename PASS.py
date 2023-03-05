@@ -11,6 +11,7 @@ import sys
 import numpy as np
 from myNetwork import network
 from iCIFAR100 import iCIFAR100
+import logging
 
 
 class protoAugSSL:
@@ -111,7 +112,8 @@ class protoAugSSL:
                 opt.step()
             if epoch % self.args.print_freq == 0:
                 accuracy = self._test(self.test_loader)
-                print('epoch:%d, accuracy:%.5f' % (epoch, accuracy))
+                # print('epoch:%d, accuracy:%.5f' % (epoch, accuracy))
+                logging.info('epoch:%d, accuracy:%.5f' % (epoch, accuracy))
         self.protoSave(self.model, self.train_loader, current_task)
 
     def _test(self, testloader):

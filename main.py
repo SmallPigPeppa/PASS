@@ -137,9 +137,7 @@ def main():
             acc_up2now.extend((args.task_num - current_task) * [0])
         acc_all.append(acc_up2now)
         print(acc_up2now)
-        logging.info(f"acc_up2now:{acc_up2now}")
     print(acc_all)
-    logging.info(f"acc_all:{acc_all}")
 
     print("############# Test for up2now Task #############")
     test_dataset = iCIFAR100('/mnt/mmtech01/usr/liuwenzhuo/torch_ds', test_transform=test_transform, train=False,
