@@ -145,7 +145,7 @@ class protoAugSSL:
             index = list(range(old_class))
             for _ in range(self.args.batch_size):
                 np.random.shuffle(index)
-                temp = self.prototype[index[0]] + np.random.normal(0, 1, 512) * self.radius
+                temp = self.prototype[index[0]] + np.random.normal(0, 1, 2048) * self.radius
                 proto_aug.append(temp)
                 proto_aug_label.append(4*self.class_label[index[0]])
 

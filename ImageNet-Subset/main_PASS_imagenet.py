@@ -138,7 +138,7 @@ def main():
                     index = list(range(len(class_index)))
                     for _ in range(args.batch_size):
                         np.random.shuffle(index)
-                        temp = class_mean[index[0]] + np.random.normal(0, 1, 512) * radius
+                        temp = class_mean[index[0]] + np.random.normal(0, 1, 2048) * radius
                         proto_aug.append(temp)
                         proto_aug_label.append(4 * class_label[index[0]])
 
