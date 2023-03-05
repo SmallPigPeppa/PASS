@@ -12,8 +12,11 @@ import random
 
 class tinyImageNet(object):
     def download_data(self):
-        train_dir = os.path.join('../dataset', 'seed_1993_subset_100_imagenet', 'data', 'train')
-        test_dir = os.path.join('../dataset', 'seed_1993_subset_100_imagenet', 'data', 'val')
+        # train_dir = os.path.join('../dataset', 'seed_1993_subset_100_imagenet', 'data', 'train')
+        # test_dir = os.path.join('../dataset', 'seed_1993_subset_100_imagenet', 'data', 'val')
+
+        train_dir = '/mnt/mmtech01/usr/liuwenzhuo/torch_ds/imagenet100/train/'
+        test_dir = '/mnt/mmtech01/usr/liuwenzhuo/torch_ds/imagenet100/val/'
         train_dset = datasets.ImageFolder(train_dir)
         test_dset = datasets.ImageFolder(test_dir)
 
