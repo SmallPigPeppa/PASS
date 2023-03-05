@@ -62,6 +62,22 @@ def main():
 
 
     feature_extractor = resnet50_ImageNet()
+
+
+
+    ckpt_path = '/mnt/mmtech01/usr/liuwenzhuo/code/solo-learn/trained_models/byol-official/byol-resnet50-imagenet-100ep-25x5nqle-ep=99.ckpt'
+    print(f"load pretrained model from {ckpt_path}")
+    state = torch.load(ckpt_path)["state_dict"]
+    for k in list(state.keys()):
+        if "encoder" in k:
+            state[k.replace("encoder", "backbone")] = state[k]
+        if "backbone" in k:
+            state[k.replace("backbone.", "")] = state[k]
+        del state[k]
+
+    feature_extractor.load_state_dict(state, strict=False)
+
+
     data_manager = DataManager()
     train_transform = transforms.Compose([
         transforms.RandomResizedCrop(224),
