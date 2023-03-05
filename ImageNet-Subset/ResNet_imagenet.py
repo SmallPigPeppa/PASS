@@ -37,6 +37,34 @@ class BasicBlock(nn.Module):
         return out
 
 
+class Bottleneck(nn.Module):
+    expansion = 4
+
+    def __init__(self, in_planes, planes, stride=1):
+        super(Bottleneck, self).__init__()
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.conv3 = nn.Conv2d(planes, self.expansion * planes, kernel_size=1, bias=False)
+        self.bn3 = nn.BatchNorm2d(self.expansion * planes)
+
+        self.shortcut = nn.Sequential()
+        if stride != 1 or in_planes != self.expansion * planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(self.expansion * planes)
+            )
+
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = F.relu(self.bn2(self.conv2(out)))
+        out = self.bn3(self.conv3(out))
+        out += self.shortcut(x)
+        out = F.relu(out)
+        return out
+
+
 class ResNet_ImageNet(nn.Module):
     def __init__(self, block, num_blocks, pretrained=False, norm=False, Embed=True, feat_dim=512, embed_dim=512):
         super(ResNet_ImageNet, self).__init__()
@@ -52,7 +80,8 @@ class ResNet_ImageNet(nn.Module):
         self.norm = norm
         self.relu = nn.ReLU(inplace=True)
         self.avgpool = nn.AvgPool2d(7, stride=1)
-        self.embed = nn.Linear(feat_dim, embed_dim)
+        self.embed = nn.Linear(feat_dim * block.expansion, embed_dim * block.expansion)
+        # self.embed = nn.Linear(feat_dim, embed_dim)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
@@ -78,3 +107,14 @@ class ResNet_ImageNet(nn.Module):
 
 def resnet18_ImageNet(**kwargs):
     return ResNet_ImageNet(BasicBlock, [2, 2, 2, 2], **kwargs)
+
+
+def resnet50_ImageNet(**kwargs):
+    return ResNet_ImageNet(Bottleneck, [3, 4, 6, 3], **kwargs)
+
+
+if __name__=='__main__':
+    a=resnet50_ImageNet()
+    input=torch.rand([16,3,224,224])
+    b=a(input)
+    print(b.shape)

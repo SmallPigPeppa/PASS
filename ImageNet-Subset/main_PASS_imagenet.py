@@ -11,9 +11,10 @@ import argparse
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 from torch.optim.lr_scheduler import MultiStepLR
-from ResNet_imagenet import resnet18_ImageNet
+from ResNet_imagenet import resnet18_ImageNet,resnet50_ImageNet
 from myNetwork_imagenet import network
 from data_manager_imagenet import *
+import logging
 
 
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -37,13 +38,30 @@ print(args)
 
 
 def main():
+    # add log
+    logs_dir = "logs"
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+    logfilename = "logs/{}_{}".format(
+        args.data_name,
+        args.task_num
+    )
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(filename)s] => %(message)s",
+        handlers=[
+            logging.FileHandler(filename=logfilename + ".log"),
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
+
     cuda_index = 'cuda:' + args.gpu
     device = torch.device(cuda_index if torch.cuda.is_available() else "cpu")
     task_size = int((args.total_nc - args.fg_nc) / args.task_num)  # number of classes in each incremental step
     file_name = args.data_name + '_' + str(args.fg_nc) + '_' + str(args.task_num) + '*' + str(task_size) + 'debug'
     os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
-    feature_extractor = resnet18_ImageNet()
+    feature_extractor = resnet50_ImageNet()
     data_manager = DataManager()
     train_transform = transforms.Compose([
         transforms.RandomResizedCrop(224),
@@ -167,7 +185,8 @@ def main():
                     correct += (predicts.cpu() == labels.cpu()).sum()
                     total += len(labels)
                 accuracy = correct.item() / total
-                print('epoch:%d,accuracy:%.5f' % (epoch, accuracy))
+                # print('epoch:%d,accuracy:%.5f' % (epoch, accuracy))
+                logging.info('epoch:%d, accuracy:%.5f' % (epoch, accuracy))
 
         ################## save prototype #####################
         model.eval()

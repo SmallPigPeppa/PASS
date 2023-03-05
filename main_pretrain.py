@@ -21,6 +21,7 @@ from PASS import protoAugSSL
 from ResNet import resnet18_cbam, resnet50_cbam
 from myNetwork import network
 from iCIFAR100 import iCIFAR100
+import logging
 
 parser = argparse.ArgumentParser(description='Prototype Augmentation and Self-Supervision for Incremental Learning')
 parser.add_argument('--epochs', default=160, type=int, help='Total number of epochs to run')
@@ -59,6 +60,25 @@ def setup_data(test_targets, shuffle, seed):
 
 
 def main():
+
+
+    logs_dir = "logs"
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+    logfilename = "logs/pretrain_{}_{}".format(
+        args.data_name,
+        args.task_num
+    )
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(filename)s] => %(message)s",
+        handlers=[
+            logging.FileHandler(filename=logfilename + ".log"),
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
+
+
     cuda_index = 'cuda:' + args.gpu
     device = torch.device(cuda_index if torch.cuda.is_available() else "cpu")
     task_size = int((args.total_nc - args.fg_nc) / args.task_num)  # number of classes in each incremental step
