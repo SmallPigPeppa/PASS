@@ -22,6 +22,7 @@ from ResNet import resnet18_cbam, resnet50_cbam
 from myNetwork import network
 from iCIFAR100 import iCIFAR100
 import logging
+import sys
 
 parser = argparse.ArgumentParser(description='Prototype Augmentation and Self-Supervision for Incremental Learning')
 parser.add_argument('--epochs', default=160, type=int, help='Total number of epochs to run')
